@@ -28,6 +28,16 @@ import {
     toSelfReference
 } from './utils';
 
+function skipProperty(object: any, skipProperties: string[]): void {
+    const keys = Object.keys(object);
+    for (const key of keys) {
+        const isSkip = skipProperties.find(property => property === toCamelCase(key)) !== undefined;
+        if (isSkip) {
+            delete object[key];
+            // TODO decide to delete key or set to undefined?
+        }
+    }
+}
 
 /**
  * Item cache.
@@ -62,6 +72,7 @@ export interface RequestOptions {
     body?: any;
     cache?: boolean;
     paginate?: boolean;
+    skip?: string[];
 }
 export interface QueryParams {
     page?: number;
@@ -237,7 +248,22 @@ export abstract class PotionBase {
             }
         };
     }
+
     private deserialize({headers, body}: PotionResponse, uri: string, options: FetchOptions): Promise<PotionResponse> {
+        // identify $refs to be skipped
+        const {skip} = options;
+        if (skip) {
+            if (Array.isArray(body)) {
+                for (const item of body) {
+                    skipProperty(item, skip);
+                }
+            } else if (typeof(body) === 'object' && body !== null && body !== undefined) {
+                skipProperty(body, skip);
+            } else {
+                console.warn('missing coverage for type: ', typeof(body)); // tslint:disable-line: no-console
+            }
+        }
+
         return this.fromPotionJSON(body, options.origin as string[])
             .then(json => {
                 // If {paginate} is enabled, return or update Pagination.
@@ -298,7 +324,6 @@ export abstract class PotionBase {
                     if (json.$ref === '#') {
                         return Promise.resolve(json.$ref);
                     }
-
                     return this.parseURI(json)
                         .then(({uri}) => {
                             if (origin.includes(uri)) {
