@@ -494,6 +494,15 @@ describe('potion/core', () => {
                 });
             });
 
+            describe('.fromPotionJSON', () => {
+                it('should apply skip options to resources even if they are retrieved from the cache', async () => {
+                    expect(true).toEqual(false);
+                });
+                // it('should not apply skip options to resources intended to be cached', async () => {
+                //     expect(true).toEqual(false);
+                // });
+            });
+
             describe('Async Properties', () => {
                 let potion: PotionBase;
                 let potionFetchSpy: jasmine.Spy;

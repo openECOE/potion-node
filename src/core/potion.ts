@@ -291,12 +291,7 @@ export abstract class PotionBase {
 
     private deserialize({headers, body}: PotionResponse, uri: string, options: FetchOptions): Promise<PotionResponse> {
         // identify $refs to be skipped
-        const {skip} = options;
-        if (skip) {
-            skipProperties(body, skip);
-        }
-
-        return this.fromPotionJSON(body, options.origin as string[])
+        return this.fromPotionJSON(body, options)
             .then(json => {
                 // If {paginate} is enabled, return or update Pagination.
                 if (options.paginate) {
@@ -314,8 +309,8 @@ export abstract class PotionBase {
     }
 
     private fromPotionJSON(
-        json: any, origin:
-        string[],
+        json: any,
+        options: FetchOptions,
         {
             rootUri,
             key,
@@ -326,6 +321,12 @@ export abstract class PotionBase {
             replaceRefs?: boolean;
         } = {}): Promise<any> {
         const Promise = this.Promise;
+        const origin: string[] = options.origin as string[];
+
+        const {skip} = options;
+        if (skip) {
+            skipProperties(json, skip);
+        }
 
         if (typeof json === 'object' && json !== null) {
             if (Array.isArray(json)) {
@@ -333,7 +334,7 @@ export abstract class PotionBase {
                 const resource = this.resource(rootUri as any);
                 // Check if prop is lazy (it's possible the root is an array and not a resource at all)
                 const isLazy = resource && isAsync(resource, key as string);
-                const getter = (replaceRefs?: boolean) => Promise.all(json.map(item => this.fromPotionJSON(item, origin, {replaceRefs})));
+                const getter = (replaceRefs?: boolean) => Promise.all(json.map(item => this.fromPotionJSON(item, options, {replaceRefs})));
                 // If this property is async,
                 // we return a lazy promise ref which will later be replaced with a getter.
                 // NOTE: When the getter is called and resolved,
@@ -356,17 +357,19 @@ export abstract class PotionBase {
                         if (!origin.includes(uri)) {
                             origin.push(uri);
                         }
-
                         const properties = this.parsePotionJSONProperties(json, origin);
-
                         // Create and cache the resource if it does not exist.
                         if (!this.cache.has(uri)) {
                             return this.cache.put(uri, properties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}])));
                         } else {
                             // If the resource already exists,
                             // update it with new properties.
-                            return Promise.all([properties, this.cache.get(uri)])
+                            const itemFromCache = this.cache.get(uri);
+                            return Promise.all([properties, itemFromCache])
                                 .then(([properties, item]) => {
+                                    if (skip) {
+                                        skipProperties(item, skip);
+                                    }
                                     Object.assign(item, properties, attrs);
                                     return item;
                                 });
@@ -419,7 +422,6 @@ export abstract class PotionBase {
                     return Promise.resolve(new Date(json.$date));
                 }
             }
-
             return this.parsePotionJSONProperties(json, origin);
         } else {
             return Promise.resolve(json);
@@ -428,7 +430,7 @@ export abstract class PotionBase {
     private parsePotionJSONProperties(json: any, origin: string[]): any {
         const Promise = this.Promise;
         const entries = Object.entries(json);
-        const values = entries.map(([key, value]) => this.fromPotionJSON(value, origin, {
+        const values = entries.map(([key, value]) => this.fromPotionJSON(value, {origin}, {
             key,
             rootUri: json.$uri
         }));
