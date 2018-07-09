@@ -500,11 +500,11 @@ describe('potion/core', () => {
                     expect(user.skippable_property).toEqual(undefined);
                 });
 
-                it('should always cache the whole object even if fields are skipped', async () => {
+                it('should not cache the object when fields are skipped', async () => {
                     const user = await User.fetch(1, {skip: ['skippableProperty']});
                     expect(user.skippable_property).toBeUndefined(undefined);
                     const userFromCache = await cache.get('/user/1');
-                    expect(userFromCache.skippableProperty).not.toBeUndefined();
+                    expect(userFromCache).toBeUndefined();
                 });
             });
 

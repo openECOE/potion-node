@@ -323,12 +323,10 @@ export abstract class PotionBase {
         const Promise = this.Promise;
         const origin: string[] = options.origin as string[];
 
-        const optionalSkip = (json: any, options: FetchOptions) => {
-            const {skip} = options;
-            if (skip) {
-                skipProperties(json, skip);
-            }
-        };
+        const {skip} = options;
+        if (skip) {
+            skipProperties(json, skip);
+        }
 
         if (typeof json === 'object' && json !== null) {
             if (Array.isArray(json)) {
@@ -361,15 +359,17 @@ export abstract class PotionBase {
                         }
                         // Create and cache the resource if it does not exist.
                         if (!this.cache.has(uri)) {
-                            // NOTE: cache whole object even if we skip properties
-                            const properties = this.parsePotionJSONProperties(json, origin);
-                            const objectInCache = this.cache.put(uri, properties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}])));
+                            // NOTE: cannot cache object when we skip properties
                             if (options.skip) {
-                                optionalSkip(json, options);
                                 const skippedProperties = this.parsePotionJSONProperties(json, origin);
-                                return skippedProperties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}]));
+                                return skippedProperties.then((skippedProperties: {}) => {
+                                    const result = Reflect.construct(resource, [{...skippedProperties, ...attrs}]);
+                                    return result;
+                                });
+                            } else {
+                                const properties = this.parsePotionJSONProperties(json, origin);
+                                return this.cache.put(uri, properties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}])));
                             }
-                            return objectInCache;
                         } else {
                             // If the resource already exists,
                             // update it with new properties.
@@ -377,7 +377,6 @@ export abstract class PotionBase {
                             const itemFromCache = this.cache.get(uri);
                             return Promise.all([properties, itemFromCache])
                                 .then(([properties, item]) => {
-                                    optionalSkip(item, options);
                                     Object.assign(item, properties, attrs);
                                     return item;
                                 });
