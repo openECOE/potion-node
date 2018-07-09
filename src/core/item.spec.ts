@@ -35,7 +35,7 @@ describe('potion/core', () => {
                                             $date: 1451060269000
                                         },
                                         skipped: 'skip-me',
-                                        skippedObject: {
+                                        skipped_object: {
                                             foo: 'bar'
                                         },
                                         realProperty: true
@@ -89,7 +89,7 @@ describe('potion/core', () => {
             it('should not load skipped fields', async () => {
                 User.fetch(2, {skip: ['skipped', 'skippedObject']}).then(user => {
                     expect(user.skipped).toBeUndefined();
-                    expect(user.skippedObject).toBeUndefined();
+                    expect(user.skipped_object).toBeUndefined();
                     expect(user.realProperty).toBe(true);
                 });
             });
@@ -150,7 +150,7 @@ describe('potion/core', () => {
                                     body: {
                                         $uri: '/user/1',
                                         skippped: 'skip-me',
-                                        skippedObject: {
+                                        skipped_object: {
                                             foo: 'bar'
                                         },
                                         realProperty: true
@@ -348,7 +348,7 @@ describe('potion/core', () => {
                 const users = await User.query({}, {skip: ['skipped', 'skippedObject']});
                 expect(users[0]).toBeDefined();
                 expect(users[0].skipped).toBeUndefined();
-                expect(users[0].skippedObject).toBeUndefined();
+                expect(users[0].skipped_object).toBeUndefined();
                 expect(users[0].realProperty).toBe(true);
             });
 

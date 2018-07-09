@@ -281,6 +281,7 @@ describe('potion/core', () => {
                                     return Promise.resolve({
                                         body: {
                                             $uri: '/user/1',
+                                            skippable_property: '',
                                             created_at: {
                                                 $date: 1451060269000
                                             }
@@ -492,15 +493,19 @@ describe('potion/core', () => {
                     expect(user.id).toEqual(uuid);
                     expect(user.createdAt instanceof Date).toBeTruthy();
                 });
-            });
 
-            describe('.fromPotionJSON', () => {
                 it('should apply skip options to resources even if they are retrieved from the cache', async () => {
-                    expect(true).toEqual(false);
+                    expect(cache.get('/user/1')).not.toBeUndefined();
+                    const user = await User.fetch(1, {skip: ['skippableProperty']});
+                    expect(user.skippable_property).toEqual(undefined);
                 });
-                // it('should not apply skip options to resources intended to be cached', async () => {
-                //     expect(true).toEqual(false);
-                // });
+
+                it('should always cache the whole object even if fields are skipped', async () => {
+                    const user = await User.fetch(1, {skip: ['skippableProperty']});
+                    expect(user.skippable_property).toBeUndefined(undefined);
+                    const userFromCache = await cache.get('/user/1');
+                    expect(userFromCache.skippableProperty).not.toBeUndefined();
+                });
             });
 
             describe('Async Properties', () => {

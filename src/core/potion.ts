@@ -323,10 +323,12 @@ export abstract class PotionBase {
         const Promise = this.Promise;
         const origin: string[] = options.origin as string[];
 
-        const {skip} = options;
-        if (skip) {
-            skipProperties(json, skip);
-        }
+        const optionalSkip = (json: any, options: FetchOptions) => {
+            const {skip} = options;
+            if (skip) {
+                skipProperties(json, skip);
+            }
+        };
 
         if (typeof json === 'object' && json !== null) {
             if (Array.isArray(json)) {
@@ -357,19 +359,25 @@ export abstract class PotionBase {
                         if (!origin.includes(uri)) {
                             origin.push(uri);
                         }
-                        const properties = this.parsePotionJSONProperties(json, origin);
                         // Create and cache the resource if it does not exist.
                         if (!this.cache.has(uri)) {
-                            return this.cache.put(uri, properties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}])));
+                            // NOTE: cache whole object even if we skip properties
+                            const properties = this.parsePotionJSONProperties(json, origin);
+                            const objectInCache = this.cache.put(uri, properties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}])));
+                            if (options.skip) {
+                                optionalSkip(json, options);
+                                const skippedProperties = this.parsePotionJSONProperties(json, origin);
+                                return skippedProperties.then((properties: {}) => Reflect.construct(resource, [{...properties, ...attrs}]));
+                            }
+                            return objectInCache;
                         } else {
                             // If the resource already exists,
                             // update it with new properties.
+                            const properties = this.parsePotionJSONProperties(json, origin);
                             const itemFromCache = this.cache.get(uri);
                             return Promise.all([properties, itemFromCache])
                                 .then(([properties, item]) => {
-                                    if (skip) {
-                                        skipProperties(item, skip);
-                                    }
+                                    optionalSkip(item, options);
                                     Object.assign(item, properties, attrs);
                                     return item;
                                 });
