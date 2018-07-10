@@ -1,6 +1,6 @@
 {
   "name": "@infarm/potion-client",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "A ES6 client for APIs written in Flask-Potion",
   "keywords": [
     "potion",
