@@ -495,9 +495,10 @@ describe('potion/core', () => {
                 });
 
                 it('should apply skip options to resources even if they are retrieved from the cache', async () => {
-                    expect(cache.get('/user/1')).not.toBeUndefined();
-                    const user = await User.fetch(1, {skip: ['skippableProperty']});
-                    expect(user.skippable_property).toEqual(undefined);
+                    await User.fetch<User>(2);
+                    expect(cache.get('/user/2')).not.toBeUndefined();
+                    const user = await User.fetch(2, {skip: ['parent']});
+                    expect(user.parent).toEqual(undefined);
                 });
 
                 it('should not cache the object when fields are skipped', async () => {

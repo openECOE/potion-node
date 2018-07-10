@@ -247,7 +247,8 @@ export abstract class PotionBase {
             // Deserialize the Potion JSON.
             .then(response => this.deserialize(response, uri, options));
 
-        if (options.method === 'GET' && !options.paginate && !options.params) {
+        // NOTE: skip directly returning from cache when skip options are set
+        if (options.method === 'GET' && !options.paginate && !options.params && !options.skip) {
             // If a GET request was made and {cache: true} return the item from cache (if it exists).
             // NOTE: Queries are not cached.
             if (options.cache && this.cache.has(cacheKey)) {
@@ -268,7 +269,6 @@ export abstract class PotionBase {
                     return Promise.reject(message);
                 }));
             }
-
             return this.requests.get(cacheKey);
         } else {
             return fetch();
@@ -377,6 +377,11 @@ export abstract class PotionBase {
                             const itemFromCache = this.cache.get(uri);
                             return Promise.all([properties, itemFromCache])
                                 .then(([properties, item]) => {
+                                    // NOTE: strip skip fields from cached object
+                                    if (skip) {
+                                        skipProperties(properties, skip);
+                                        skipProperties(item, skip);
+                                    }
                                     Object.assign(item, properties, attrs);
                                     return item;
                                 });
