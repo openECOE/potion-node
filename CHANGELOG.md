@@ -1,3 +1,8 @@
+<a name="4.0.5"></a>
+## [4.0.5](https://github.com/infarm/potion-node/compare/v4.0.4...v4.0.5) (2018-07-12)
+
+
+
 <a name="4.0.4"></a>
 ## [4.0.4](https://github.com/infarm/potion-node/compare/v4.0.3...v4.0.4) (2018-07-10)
 
