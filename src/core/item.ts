@@ -15,6 +15,7 @@ export interface ItemOptions {
 
 export type ItemFetchOptions = Pick<RequestOptions, 'cache' | 'skip'>;
 export type ItemQueryOptions = Pick<RequestOptions, 'cache' | 'paginate' | 'skip'>;
+export type ItemUpdateOptions = Pick<RequestOptions, 'skip'>;
 
 export interface ItemInitArgs {
     [key: string]: any;
@@ -172,12 +173,13 @@ export abstract class Item {
      * Update the resource.
      * @param data - An object with any properties to update.
      */
-    async update(data: any = {}): Promise<this> {
+    async update(data: any = {}, options?: ItemUpdateOptions): Promise<this> {
         const potion = getPotionInstance(this.constructor as typeof Item);
         return potion.fetch(this.uri, {
             cache: true,
             method: 'PATCH',
-            body: data
+            body: data,
+            ...options
         });
     }
 
