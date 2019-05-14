@@ -14,8 +14,8 @@ import {
     HttpResponse
 } from '@angular/common/http';
 
-import {filter} from 'rxjs/operators/filter';
-import {map} from 'rxjs/operators/map';
+import {filter} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 
 import {Item, ItemOptions} from '../core/item';
 import {PotionBase, PotionOptions, RequestOptions} from '../core/potion';
