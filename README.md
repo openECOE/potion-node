@@ -57,7 +57,7 @@ class Foo extends Item {
 ### Contribute
 --------------
 If you'd like to contribute:
-1. Clone the repository `git clone https://github.com/infarm/potion-node`;
+1. Clone the repository `git clone https://github.com/openecoe/potion-node`;
 2. Install all the deps `yarn install`/`npm install`. 
 
 Now you can start hacking :)

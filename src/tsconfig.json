@@ -6,7 +6,7 @@
         "annotateForClosureCompiler": true,
         "genDir": "../out-tsc/lib-gen-dir/",
         "flatModuleOutFile": "ng.js",
-        "flatModuleId": "@infarm/potion-client",
+        "flatModuleId": "@openECOE/potion-client",
         "strictMetadataEmit": true,
         "skipTemplateCodegen": true
     },
