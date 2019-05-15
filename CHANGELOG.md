@@ -1,3 +1,8 @@
+<a name="4.0.10"></a>
+## [4.0.10](https://github.com/openecoe/potion-node/compare/v4.0.9...v4.0.10) (2019-05-15)
+
+
+
 <a name="4.0.9"></a>
 ## [4.0.9](https://github.com/openecoe/potion-node/compare/v4.0.8...v4.0.9) (2019-05-15)
 
