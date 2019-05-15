@@ -1,5 +1,5 @@
 {
-  "name": "@openeecoe/potion-client",
+  "name": "@openecoe/potion-client",
   "version": "4.0.9",
   "description": "A ES6 client for APIs written in Flask-Potion",
   "keywords": [
