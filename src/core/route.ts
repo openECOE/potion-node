@@ -16,7 +16,7 @@ export function route<T>(path: string, {method}: RequestOptions = {}): RouteType
         const options: RequestOptions = {method, paginate, cache};
         if (method === 'GET') {
             options.params = params;
-        } else if ((['POST', 'PUT', 'PATCH'] as any).includes(method)) {
+        } else if ((['POST', 'PUT', 'PATCH', 'DELETE'] as any).includes(method)) {
             options.body = params;
         }
 
